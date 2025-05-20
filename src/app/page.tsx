@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { Heart, Sparkles } from 'lucide-react';
-import { confetti } from 'canvas-confetti';
-
+import confetti from 'canvas-confetti/dist/confetti.module';
 export default function Home() {
   const [complaints, setComplaints] = useState<string[]>([]);
   const [newComplaint, setNewComplaint] = useState('');
