@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Heart, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
+
 export default function Home() {
   const [complaints, setComplaints] = useState<string[]>([]);
   const [newComplaint, setNewComplaint] = useState('');
@@ -21,6 +22,15 @@ export default function Home() {
       setNewComplaint('');
       launchConfetti();
     }
+  };
+
+  const saySomethingCute = () => {
+    confetti({
+      particleCount: 150,
+      spread: 90,
+      origin: { y: 0.6 },
+    });
+    alert('i loveee youu soo mucchhh kuroo <3');
   };
 
   return (
@@ -45,6 +55,14 @@ export default function Home() {
           Submit with Love <Heart className="ml-2" />
         </button>
       </div>
+
+      {/* New button added here */}
+      <button
+        onClick={saySomethingCute}
+        className="mt-6 bg-pink-400 hover:bg-pink-500 text-white font-bold py-2 px-6 rounded"
+      >
+        Say Something Cute
+      </button>
 
       {complaints.length > 0 && (
         <div className="mt-10 w-full max-w-2xl">
