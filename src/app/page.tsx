@@ -5,30 +5,35 @@ import { createClient } from '@supabase/supabase-js';
 import { Heart, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-// Supabase config
+// 🔑 Supabase connection
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Mood emoji map
-const moods = {
-  happy: '😊',
-  sad: '😢',
-  angry: '😠',
-  okk: '😐',
-  crazy: '🤪',
-};
+// 😍 Mood options
+const moodOptions = [
+  { label: 'Angry', emoji: '😠' },
+  { label: 'Sad', emoji: '😢' },
+  { label: 'Happy', emoji: '😊' },
+  { label: 'Okk', emoji: '😐' },
+  { label: 'Crazy', emoji: '🤪' },
+];
 
 export default function Home() {
-  const [complaints, setComplaints] = useState<{ content: string; mood: string }[]>([]);
+  const [complaints, setComplaints] = useState<{ content: string; mood?: string }[]>([]);
   const [newComplaint, setNewComplaint] = useState('');
-  const [selectedMood, setSelectedMood] = useState<keyof typeof moods | ''>('');
   const [loading, setLoading] = useState(true);
 
+  // 🎉
   const launchConfetti = () => {
-    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+    });
   };
 
+  // 📦 Fetch complaints
   useEffect(() => {
     const fetchComplaints = async () => {
       const { data, error } = await supabase
@@ -36,36 +41,55 @@ export default function Home() {
         .select('content, mood')
         .order('created_at', { ascending: true });
 
-      if (!error && data) {
-        setComplaints(data as any);
-      } else {
-        console.error(error);
+      if (error) {
+        console.error('Error loading complaints:', error);
+      } else if (data) {
+        setComplaints(data);
       }
       setLoading(false);
     };
+
     fetchComplaints();
   }, []);
 
-  const handleSubmit = async () => {
+  // 💌 Submit complaint only (mood optional)
+  const handleSubmitComplaint = async () => {
     const trimmed = newComplaint.trim();
-    if (!trimmed || !selectedMood) return;
-
-    const { error } = await supabase
-      .from('complaints')
-      .insert([{ content: trimmed, mood: selectedMood }]);
-
-    if (error) {
-      alert('Error saving complaint. Try again.');
-      console.error(error);
+    if (!trimmed) {
+      alert('Write something first, love!');
       return;
     }
 
-    setComplaints([...complaints, { content: trimmed, mood: selectedMood }]);
+    const { error } = await supabase
+      .from('complaints')
+      .insert([{ content: trimmed }]);
+
+    if (error) {
+      console.error('Error saving complaint:', error);
+      alert('Error saving complaint. Try again.');
+      return;
+    }
+
+    setComplaints([...complaints, { content: trimmed }]);
     setNewComplaint('');
-    setSelectedMood('');
     launchConfetti();
   };
 
+  // 💖 Mood emoji (separate action)
+  const handleMoodSelect = async (emoji: string, label: string) => {
+    const { error } = await supabase
+      .from('mood')
+      .insert([{ emoji, mood: label }]);
+
+    if (error) {
+      console.error('Error saving mood:', error);
+      alert('Couldn’t save mood 😥');
+    } else {
+      alert(`Mood "${label}" saved! 🫶`);
+    }
+  };
+
+  // 💬 Cute message
   const saySomethingCute = () => {
     confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
     alert('i loveee youu soo mucchhh kuroo <3');
@@ -73,6 +97,26 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-pink-50 flex flex-col items-center p-6">
+      {/* 👩‍❤️‍👨 Photos */}
+      <div className="flex justify-center items-center gap-6 mb-4">
+        <div className="text-center">
+          <img
+            src="/shorya.jpg"
+            alt="Shorya"
+            className="w-24 h-24 rounded-full border-4 border-pink-300 object-cover"
+          />
+          <p className="mt-2 font-semibold text-pink-700">Shorya</p>
+        </div>
+        <div className="text-center">
+          <img
+            src="/reya.jpg"
+            alt="Reya"
+            className="w-24 h-24 rounded-full border-4 border-pink-300 object-cover"
+          />
+          <p className="mt-2 font-semibold text-pink-700">Reya</p>
+        </div>
+      </div>
+
       <h1 className="text-4xl font-bold text-pink-700 mb-4">
         Shorya & Reya's Love Portal <Sparkles className="inline ml-2 text-yellow-400" />
       </h1>
@@ -80,7 +124,7 @@ export default function Home() {
         Hey Reya! Got a tiny grievance or a silly little complaint? Submit it here, and I'll fix it with love and kisses!
       </p>
 
-      {/* Input form */}
+      {/* Complaint Form */}
       <div className="w-full max-w-lg bg-white shadow-lg rounded-2xl p-4">
         <textarea
           className="w-full p-2 border border-pink-200 rounded mb-4"
@@ -89,24 +133,8 @@ export default function Home() {
           onChange={(e) => setNewComplaint(e.target.value)}
           rows={4}
         />
-
-        {/* Mood Selector */}
-        <div className="flex justify-between mb-4">
-          {Object.entries(moods).map(([mood, emoji]) => (
-            <button
-              key={mood}
-              onClick={() => setSelectedMood(mood as keyof typeof moods)}
-              className={`text-2xl px-3 py-1 rounded-full border ${
-                selectedMood === mood ? 'bg-pink-200' : 'bg-white'
-              }`}
-            >
-              {emoji}
-            </button>
-          ))}
-        </div>
-
         <button
-          onClick={handleSubmit}
+          onClick={handleSubmitComplaint}
           disabled={loading}
           className="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded w-full flex justify-center items-center"
         >
@@ -114,7 +142,24 @@ export default function Home() {
         </button>
       </div>
 
-      {/* Cute button */}
+      {/* Mood Selector */}
+      <div className="mt-6 text-center">
+        <p className="mb-2 text-pink-700 font-medium">How’s your mood, Reya?</p>
+        <div className="flex gap-3 justify-center">
+          {moodOptions.map((mood) => (
+            <button
+              key={mood.label}
+              onClick={() => handleMoodSelect(mood.emoji, mood.label)}
+              className="text-3xl hover:scale-125 transition-transform"
+              title={mood.label}
+            >
+              {mood.emoji}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Cute Button */}
       <button
         onClick={saySomethingCute}
         className="mt-6 bg-pink-400 hover:bg-pink-500 text-white font-bold py-2 px-6 rounded"
@@ -122,15 +167,15 @@ export default function Home() {
         Say Something Cute
       </button>
 
-      {/* Complaint display */}
+      {/* Display Complaints */}
       {complaints.length > 0 && (
         <div className="mt-10 w-full max-w-2xl">
           <h2 className="text-2xl font-semibold text-pink-700 mb-4">Reya's Adorable Complaints</h2>
           {complaints.map((c, i) => (
             <div key={i} className="mb-3 bg-white shadow rounded-xl p-4 border border-pink-100">
-              <p className="text-pink-800 text-lg">{c.content}</p>
-              <p className="text-xl mt-2">{moods[c.mood as keyof typeof moods]}</p>
-              <p className="text-sm text-gray-500 italic">
+              <p className="text-xl">{c.mood ? moodOptions.find(m => m.label === c.mood)?.emoji : ''}</p>
+              <p className="text-pink-800 mt-2">{c.content}</p>
+              <p className="text-sm text-gray-500 mt-2 italic">
                 Noted, my love. Shorya will handle this with hugs and maybe a surprise chocolate!
               </p>
             </div>
