@@ -5,12 +5,10 @@ import { createClient } from '@supabase/supabase-js';
 import { Heart, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-// 🔑 Supabase connection
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// 😍 Mood options
 const moodOptions = [
   { label: 'Angry', emoji: '😠' },
   { label: 'Sad', emoji: '😢' },
@@ -23,37 +21,21 @@ export default function Home() {
   const [complaints, setComplaints] = useState<{ content: string; mood?: string }[]>([]);
   const [newComplaint, setNewComplaint] = useState('');
   const [loading, setLoading] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(false);
 
-  // 💡 Show popup once on page load
+  // 💡 Show modal once on load
   useEffect(() => {
-  const hasShown = sessionStorage.getItem('welcomeShown');
-  if (!hasShown) {
-    alert(`📣 Welcome to the Love Complaints Portal! 💔
+    const hasShown = sessionStorage.getItem('welcomeShown');
+    if (!hasShown) {
+      setShowWelcome(true);
+      sessionStorage.setItem('welcomeShown', 'true');
+    }
+  }, []);
 
-Here you can say whatever you want to tell your silly boyfriend indirectly: 
-🥺 Cry about ignored texts,
-😤 Rant about forgotten anniversaries,
-😆 Complain about silly fights,
-😍 And still say "I love you" five seconds later.
-
-Your love drama is safe here. Let it out. We won’t judge.
-(In fact, we might even give you a virtual tissue 🧻💕)
-
-Ready? Go spill the tea. ☕`);
-    sessionStorage.setItem('welcomeShown', 'true');
-  }
-}, []);
-
-  // 🎉
   const launchConfetti = () => {
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 },
-    });
+    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
   };
 
-  // 📦 Fetch complaints
   useEffect(() => {
     const fetchComplaints = async () => {
       const { data, error } = await supabase
@@ -72,7 +54,6 @@ Ready? Go spill the tea. ☕`);
     fetchComplaints();
   }, []);
 
-  // 💌 Submit complaint only (mood optional)
   const handleSubmitComplaint = async () => {
     const trimmed = newComplaint.trim();
     if (!trimmed) {
@@ -95,7 +76,6 @@ Ready? Go spill the tea. ☕`);
     launchConfetti();
   };
 
-  // 💖 Mood emoji (separate action)
   const handleMoodSelect = async (emoji: string, label: string) => {
     const { error } = await supabase
       .from('mood')
@@ -109,7 +89,6 @@ Ready? Go spill the tea. ☕`);
     }
   };
 
-  // 💬 Cute message
   const saySomethingCute = () => {
     confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
     alert('i loveee youu soo mucchhh kuroo <3');
@@ -117,6 +96,35 @@ Ready? Go spill the tea. ☕`);
 
   return (
     <div className="min-h-screen bg-pink-50 flex flex-col items-center p-6">
+
+      {/* 💌 Welcome Modal */}
+      {showWelcome && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-2xl shadow-lg p-6 max-w-md text-center border-4 border-pink-200">
+            <h2 className="text-xl font-bold text-pink-600 mb-2">📣 Welcome to the Love Complaints Portal! 💔</h2>
+            <p className="text-pink-800 mb-4 text-sm leading-relaxed">
+              Here you can say whatever you want to tell your silly boyfriend indirectly:
+              <br /><br />
+              🥺 Cry about ignored texts,<br />
+              😤 Rant about forgotten anniversaries,<br />
+              😆 Complain about silly fights,<br />
+              😍 And still say "I love you" five seconds later.
+              <br /><br />
+              Your love drama is safe here. Let it out. We won’t judge.<br />
+              (In fact, we might even give you a virtual tissue 🧻💕)
+              <br /><br />
+              Ready? Go spill the tea. ☕
+            </p>
+            <button
+              onClick={() => setShowWelcome(false)}
+              className="bg-pink-500 hover:bg-pink-600 text-white font-semibold px-6 py-2 rounded-full"
+            >
+              Okayyy 💕
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 👩‍❤️‍👨 Photos */}
       <div className="flex justify-center items-center gap-6 mb-4">
         <div className="text-center">
