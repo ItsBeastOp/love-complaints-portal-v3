@@ -24,6 +24,26 @@ export default function Home() {
   const [newComplaint, setNewComplaint] = useState('');
   const [loading, setLoading] = useState(true);
 
+  // 💡 Show popup once on page load
+  useEffect(() => {
+  const hasShown = sessionStorage.getItem('welcomeShown');
+  if (!hasShown) {
+    alert(`📣 Welcome to the Love Complaints Portal! 💔
+
+Here you can say whatever you want to tell your silly boyfriend indirectly: 
+🥺 Cry about ignored texts,
+😤 Rant about forgotten anniversaries,
+😆 Complain about silly fights,
+😍 And still say "I love you" five seconds later.
+
+Your love drama is safe here. Let it out. We won’t judge.
+(In fact, we might even give you a virtual tissue 🧻💕)
+
+Ready? Go spill the tea. ☕`);
+    sessionStorage.setItem('welcomeShown', 'true');
+  }
+}, []);
+
   // 🎉
   const launchConfetti = () => {
     confetti({
