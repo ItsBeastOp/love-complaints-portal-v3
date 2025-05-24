@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Heart, Sparkles, Laugh, HeartPulse } from 'lucide-react';
+import { Heart, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -23,7 +23,8 @@ export default function Home() {
   const [newComplaint, setNewComplaint] = useState('');
   const [loading, setLoading] = useState(true);
   const [showWelcome, setShowWelcome] = useState(false);
-  const [showLoveMessage, setShowLoveMessage] = useState(false);
+  const [showCutePopup, setShowCutePopup] = useState(false);
+  const [moodPopup, setMoodPopup] = useState<{ label: string; emoji: string } | null>(null);
 
   useEffect(() => {
     const hasShown = sessionStorage.getItem('welcomeShown');
@@ -86,51 +87,29 @@ export default function Home() {
       console.error('Error saving mood:', error);
       alert('Couldn’t save mood 😥');
     } else {
-      alert(`Mood "${label}" saved! 🫶`);
+      setMoodPopup({ emoji, label });
+      setTimeout(() => setMoodPopup(null), 2000);
     }
   };
 
   const saySomethingCute = () => {
     confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
-    setShowLoveMessage(true);
-    setTimeout(() => setShowLoveMessage(false), 5000);
+    setShowCutePopup(true);
+    setTimeout(() => setShowCutePopup(false), 3000);
   };
 
   return (
-    <div className="min-h-screen bg-pink-50 flex flex-col items-center p-6 relative overflow-hidden">
-
-      <AnimatePresence>
-        {showLoveMessage && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.5 }}
-            transition={{ duration: 0.5 }}
-            className="fixed z-50 top-20 bg-white text-pink-600 border-4 border-pink-200 rounded-3xl px-6 py-4 shadow-xl text-xl font-bold flex items-center gap-2 animate-bounce"
-          >
-            <HeartPulse className="text-red-500 animate-pulse" />
-            I loveee youu soo mucchhh Kurooo 💖💖💖 you silly goose 🤪
-            <Laugh className="text-yellow-400" />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
+    <div className="min-h-screen bg-pink-50 flex flex-col items-center p-6">
       {showWelcome && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
           <div className="bg-white rounded-2xl shadow-lg p-6 max-w-md text-center border-4 border-pink-200">
             <h2 className="text-xl font-bold text-pink-600 mb-2">📣 Welcome to the Love Complaints Portal! 💔</h2>
             <p className="text-pink-800 mb-4 text-sm leading-relaxed">
               Here you can say whatever you want to tell your silly boyfriend indirectly:
-              <br /><br />
-              🥺 Cry about ignored texts,<br />
-              😤 Rant about forgotten anniversaries,<br />
-              😆 Complain about silly fights,<br />
-              😍 And still say "I love you" five seconds later.
-              <br /><br />
-              Your love drama is safe here. Let it out. We won’t judge.<br />
+              <br /><br />🥺 Cry about ignored texts,<br />😤 Rant about forgotten anniversaries,<br />😆 Complain about silly fights,<br />😍 And still say "I love you" five seconds later.
+              <br /><br />Your love drama is safe here. Let it out. We won’t judge.<br />
               (In fact, we might even give you a virtual tissue 🧻💕)
-              <br /><br />
-              Ready? Go spill the tea. ☕
+              <br /><br />Ready? Go spill the tea. ☕
             </p>
             <button
               onClick={() => setShowWelcome(false)}
@@ -144,19 +123,11 @@ export default function Home() {
 
       <div className="flex justify-center items-center gap-6 mb-4">
         <div className="text-center">
-          <img
-            src="/shorya.jpg"
-            alt="Shorya"
-            className="w-24 h-24 rounded-full border-4 border-pink-300 object-cover"
-          />
+          <img src="/shorya.jpg" alt="Shorya" className="w-24 h-24 rounded-full border-4 border-pink-300 object-cover" />
           <p className="mt-2 font-semibold text-pink-700">Shorya</p>
         </div>
         <div className="text-center">
-          <img
-            src="/reya.jpg"
-            alt="Reya"
-            className="w-24 h-24 rounded-full border-4 border-pink-300 object-cover"
-          />
+          <img src="/reya.jpg" alt="Reya" className="w-24 h-24 rounded-full border-4 border-pink-300 object-cover" />
           <p className="mt-2 font-semibold text-pink-700">Reya</p>
         </div>
       </div>
@@ -205,8 +176,34 @@ export default function Home() {
         onClick={saySomethingCute}
         className="mt-6 bg-pink-400 hover:bg-pink-500 text-white font-bold py-2 px-6 rounded"
       >
-        Say Something Cute 💘
+        Say Something Cute
       </button>
+
+      <AnimatePresence>
+        {showCutePopup && (
+          <motion.div
+            initial={{ opacity: 0, y: -30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -30 }}
+            className="fixed top-10 left-1/2 transform -translate-x-1/2 bg-white text-pink-700 border border-pink-300 px-6 py-3 rounded-xl shadow-lg z-50 text-lg font-bold"
+          >
+            💖 I LOVE YOUUU SOOO MUCHHH KUROOO 😘💋 You're the peanut butter to my jelly! 🍓
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {moodPopup && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-yellow-100 border border-yellow-300 text-yellow-800 px-5 py-3 rounded-full shadow-lg z-50"
+          >
+            Mood "{moodPopup.label}" {moodPopup.emoji} saved with love! 💕
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {complaints.length > 0 && (
         <div className="mt-10 w-full max-w-2xl">
