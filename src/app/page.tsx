@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Heart, Sparkles } from 'lucide-react';
+import { Heart, Sparkles, Laugh, HeartPulse } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -20,9 +21,9 @@ const moodOptions = [
 export default function Home() {
   const [complaints, setComplaints] = useState<{ content: string; mood?: string }[]>([]);
   const [newComplaint, setNewComplaint] = useState('');
-  const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [showLoveMessage, setShowLoveMessage] = useState(false);
 
   useEffect(() => {
     const hasShown = sessionStorage.getItem('welcomeShown');
@@ -63,7 +64,7 @@ export default function Home() {
 
     const { error } = await supabase
       .from('complaints')
-      .insert([{ content: trimmed, mood: selectedMood }]);
+      .insert([{ content: trimmed }]);
 
     if (error) {
       console.error('Error saving complaint:', error);
@@ -71,19 +72,48 @@ export default function Home() {
       return;
     }
 
-    setComplaints([...complaints, { content: trimmed, mood: selectedMood ?? undefined }]);
+    setComplaints([...complaints, { content: trimmed }]);
     setNewComplaint('');
-    setSelectedMood(null);
     launchConfetti();
+  };
+
+  const handleMoodSelect = async (emoji: string, label: string) => {
+    const { error } = await supabase
+      .from('mood')
+      .insert([{ emoji, mood: label }]);
+
+    if (error) {
+      console.error('Error saving mood:', error);
+      alert('Couldn’t save mood 😥');
+    } else {
+      alert(`Mood "${label}" saved! 🫶`);
+    }
   };
 
   const saySomethingCute = () => {
     confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
-    alert('i loveee youu soo mucchhh kuroo <3');
+    setShowLoveMessage(true);
+    setTimeout(() => setShowLoveMessage(false), 5000);
   };
 
   return (
-    <div className="min-h-screen bg-pink-50 flex flex-col items-center p-6">
+    <div className="min-h-screen bg-pink-50 flex flex-col items-center p-6 relative overflow-hidden">
+
+      <AnimatePresence>
+        {showLoveMessage && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            transition={{ duration: 0.5 }}
+            className="fixed z-50 top-20 bg-white text-pink-600 border-4 border-pink-200 rounded-3xl px-6 py-4 shadow-xl text-xl font-bold flex items-center gap-2 animate-bounce"
+          >
+            <HeartPulse className="text-red-500 animate-pulse" />
+            I loveee youu soo mucchhh Kurooo 💖💖💖 you silly goose 🤪
+            <Laugh className="text-yellow-400" />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {showWelcome && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
@@ -146,22 +176,6 @@ export default function Home() {
           onChange={(e) => setNewComplaint(e.target.value)}
           rows={4}
         />
-
-        <div className="flex justify-center gap-3 mb-4">
-          {moodOptions.map((mood) => (
-            <button
-              key={mood.label}
-              onClick={() => setSelectedMood(mood.label)}
-              className={`text-3xl hover:scale-125 transition-transform ${
-                selectedMood === mood.label ? 'ring-2 ring-pink-400 rounded-full' : ''
-              }`}
-              title={mood.label}
-            >
-              {mood.emoji}
-            </button>
-          ))}
-        </div>
-
         <button
           onClick={handleSubmitComplaint}
           disabled={loading}
@@ -171,11 +185,27 @@ export default function Home() {
         </button>
       </div>
 
+      <div className="mt-6 text-center">
+        <p className="mb-2 text-pink-700 font-medium">How’s your mood, Reya?</p>
+        <div className="flex gap-3 justify-center">
+          {moodOptions.map((mood) => (
+            <button
+              key={mood.label}
+              onClick={() => handleMoodSelect(mood.emoji, mood.label)}
+              className="text-3xl hover:scale-125 transition-transform"
+              title={mood.label}
+            >
+              {mood.emoji}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <button
         onClick={saySomethingCute}
         className="mt-6 bg-pink-400 hover:bg-pink-500 text-white font-bold py-2 px-6 rounded"
       >
-        Say Something Cute
+        Say Something Cute 💘
       </button>
 
       {complaints.length > 0 && (
@@ -183,11 +213,7 @@ export default function Home() {
           <h2 className="text-2xl font-semibold text-pink-700 mb-4">Reya's Adorable Complaints</h2>
           {complaints.map((c, i) => (
             <div key={i} className="mb-3 bg-white shadow rounded-xl p-4 border border-pink-100">
-              {c.mood && (
-                <p className="text-xl">
-                  {moodOptions.find((m) => m.label === c.mood)?.emoji} <span className="text-sm text-pink-500">{c.mood}</span>
-                </p>
-              )}
+              <p className="text-xl">{c.mood ? moodOptions.find(m => m.label === c.mood)?.emoji : ''}</p>
               <p className="text-pink-800 mt-2">{c.content}</p>
               <p className="text-sm text-gray-500 mt-2 italic">
                 Noted, my love. Shorya will handle this with hugs and maybe a surprise chocolate!
