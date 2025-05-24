@@ -20,10 +20,10 @@ const moodOptions = [
 export default function Home() {
   const [complaints, setComplaints] = useState<{ content: string; mood?: string }[]>([]);
   const [newComplaint, setNewComplaint] = useState('');
+  const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showWelcome, setShowWelcome] = useState(false);
 
-  // 💡 Show modal once on load
   useEffect(() => {
     const hasShown = sessionStorage.getItem('welcomeShown');
     if (!hasShown) {
@@ -63,7 +63,7 @@ export default function Home() {
 
     const { error } = await supabase
       .from('complaints')
-      .insert([{ content: trimmed }]);
+      .insert([{ content: trimmed, mood: selectedMood }]);
 
     if (error) {
       console.error('Error saving complaint:', error);
@@ -71,22 +71,10 @@ export default function Home() {
       return;
     }
 
-    setComplaints([...complaints, { content: trimmed }]);
+    setComplaints([...complaints, { content: trimmed, mood: selectedMood ?? undefined }]);
     setNewComplaint('');
+    setSelectedMood(null);
     launchConfetti();
-  };
-
-  const handleMoodSelect = async (emoji: string, label: string) => {
-    const { error } = await supabase
-      .from('mood')
-      .insert([{ emoji, mood: label }]);
-
-    if (error) {
-      console.error('Error saving mood:', error);
-      alert('Couldn’t save mood 😥');
-    } else {
-      alert(`Mood "${label}" saved! 🫶`);
-    }
   };
 
   const saySomethingCute = () => {
@@ -97,7 +85,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-pink-50 flex flex-col items-center p-6">
 
-      {/* 💌 Welcome Modal */}
       {showWelcome && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
           <div className="bg-white rounded-2xl shadow-lg p-6 max-w-md text-center border-4 border-pink-200">
@@ -125,7 +112,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* 👩‍❤️‍👨 Photos */}
       <div className="flex justify-center items-center gap-6 mb-4">
         <div className="text-center">
           <img
@@ -152,7 +138,6 @@ export default function Home() {
         Hey Reya! Got a tiny grievance or a silly little complaint? Submit it here, and I'll fix it with love and kisses!
       </p>
 
-      {/* Complaint Form */}
       <div className="w-full max-w-lg bg-white shadow-lg rounded-2xl p-4">
         <textarea
           className="w-full p-2 border border-pink-200 rounded mb-4"
@@ -161,6 +146,22 @@ export default function Home() {
           onChange={(e) => setNewComplaint(e.target.value)}
           rows={4}
         />
+
+        <div className="flex justify-center gap-3 mb-4">
+          {moodOptions.map((mood) => (
+            <button
+              key={mood.label}
+              onClick={() => setSelectedMood(mood.label)}
+              className={`text-3xl hover:scale-125 transition-transform ${
+                selectedMood === mood.label ? 'ring-2 ring-pink-400 rounded-full' : ''
+              }`}
+              title={mood.label}
+            >
+              {mood.emoji}
+            </button>
+          ))}
+        </div>
+
         <button
           onClick={handleSubmitComplaint}
           disabled={loading}
@@ -170,24 +171,6 @@ export default function Home() {
         </button>
       </div>
 
-      {/* Mood Selector */}
-      <div className="mt-6 text-center">
-        <p className="mb-2 text-pink-700 font-medium">How’s your mood, Reya?</p>
-        <div className="flex gap-3 justify-center">
-          {moodOptions.map((mood) => (
-            <button
-              key={mood.label}
-              onClick={() => handleMoodSelect(mood.emoji, mood.label)}
-              className="text-3xl hover:scale-125 transition-transform"
-              title={mood.label}
-            >
-              {mood.emoji}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Cute Button */}
       <button
         onClick={saySomethingCute}
         className="mt-6 bg-pink-400 hover:bg-pink-500 text-white font-bold py-2 px-6 rounded"
@@ -195,13 +178,16 @@ export default function Home() {
         Say Something Cute
       </button>
 
-      {/* Display Complaints */}
       {complaints.length > 0 && (
         <div className="mt-10 w-full max-w-2xl">
           <h2 className="text-2xl font-semibold text-pink-700 mb-4">Reya's Adorable Complaints</h2>
           {complaints.map((c, i) => (
             <div key={i} className="mb-3 bg-white shadow rounded-xl p-4 border border-pink-100">
-              <p className="text-xl">{c.mood ? moodOptions.find(m => m.label === c.mood)?.emoji : ''}</p>
+              {c.mood && (
+                <p className="text-xl">
+                  {moodOptions.find((m) => m.label === c.mood)?.emoji} <span className="text-sm text-pink-500">{c.mood}</span>
+                </p>
+              )}
               <p className="text-pink-800 mt-2">{c.content}</p>
               <p className="text-sm text-gray-500 mt-2 italic">
                 Noted, my love. Shorya will handle this with hugs and maybe a surprise chocolate!
