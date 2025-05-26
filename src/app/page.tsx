@@ -121,7 +121,7 @@ export default function Home() {
           <div className="bg-white rounded-2xl shadow-lg p-6 max-w-md text-center border-4 border-pink-200">
             <h2 className="text-xl font-bold text-pink-600 mb-2">📣 Welcome to the Love Complaints Portal! 💔</h2>
             <p className="text-pink-800 mb-4 text-sm leading-relaxed">
-              ... all your adorable welcome content ...
+              You can submit love complaints, select your mood, and get cute surprises 😘
             </p>
             <button
               onClick={() => setShowWelcome(false)}
@@ -163,5 +163,58 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* Photos, Header, Input, etc. */}
-      {/* (unchanged content continues here...) */}
+      {/* Input */}
+      <div className="z-10 mt-8 w-full max-w-md">
+        <input
+          type="text"
+          placeholder="Enter your love complaint 💌"
+          value={newComplaint}
+          onChange={(e) => setNewComplaint(e.target.value)}
+          className="w-full p-3 border-2 border-pink-300 rounded-xl shadow focus:outline-none focus:ring-2 focus:ring-pink-400"
+        />
+        <button
+          onClick={handleSubmitComplaint}
+          className="mt-2 w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2 rounded-xl"
+        >
+          Submit Complaint 💖
+        </button>
+      </div>
+
+      {/* Mood Buttons */}
+      <div className="mt-6 flex gap-2 flex-wrap justify-center z-10">
+        {moodOptions.map(({ label, emoji }) => (
+          <button
+            key={label}
+            onClick={() => handleMoodSelect(emoji, label)}
+            className="px-4 py-2 rounded-full bg-white border border-pink-300 shadow hover:bg-pink-100 transition"
+          >
+            {emoji} {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Mood message */}
+      {moodMessage && (
+        <div className="mt-4 text-sm text-pink-700 font-medium z-10">{moodMessage}</div>
+      )}
+
+      {/* Complaints list */}
+      <div className="mt-10 w-full max-w-md space-y-2 z-10">
+        {complaints.map((c, i) => (
+          <div key={i} className="bg-white p-3 rounded-xl border border-pink-200 shadow">
+            <p className="text-pink-800 text-sm">{c.content}</p>
+            {c.mood && <p className="text-xs text-pink-400 mt-1">Mood: {c.mood}</p>}
+          </div>
+        ))}
+      </div>
+
+      {/* Cute Button */}
+      <button
+        onClick={saySomethingCute}
+        className="fixed bottom-6 right-6 bg-pink-400 hover:bg-pink-500 text-white p-4 rounded-full shadow-lg z-10"
+      >
+        <Sparkles />
+      </button>
+    </div>
+  );
+}
