@@ -6,10 +6,12 @@ import { Heart, Sparkles, Lock } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// 🎈 Supabase setup
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// 😘 Mood options
 const moodOptions = [
   { label: 'Angry', emoji: '😠' },
   { label: 'Sad', emoji: '😢' },
@@ -17,6 +19,28 @@ const moodOptions = [
   { label: 'Okk', emoji: '😐' },
   { label: 'Crazy', emoji: '🤪' },
 ];
+
+// 💗 Heart background component
+const HeartBackground = () => {
+  return (
+    <div className="absolute inset-0 overflow-hidden z-0 pointer-events-none">
+      {[...Array(25)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute text-pink-300 text-2xl animate-floating"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 10}s`,
+            fontSize: `${16 + Math.random() * 24}px`,
+          }}
+        >
+          💖
+        </div>
+      ))}
+    </div>
+  );
+};
 
 export default function Home() {
   const [complaints, setComplaints] = useState<{ content: string; mood?: string }[]>([]);
@@ -94,27 +118,9 @@ export default function Home() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#fff0f6] flex flex-col items-center p-6 overflow-hidden font-[\'Comic Neue\']">
-
-      {/* 💖 Floating Hearts Background */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute text-pink-300 text-2xl"
-            initial={{ y: '100vh', x: `${Math.random() * 100}%`, opacity: 0 }}
-            animate={{ y: '-10vh', opacity: [0, 1, 0] }}
-            transition={{
-              delay: Math.random() * 5,
-              duration: 10 + Math.random() * 5,
-              repeat: Infinity,
-              ease: 'linear'
-            }}
-          >
-            💕
-          </motion.div>
-        ))}
-      </div>
+    <div className="relative min-h-screen bg-[#fff0f6] flex flex-col items-center p-6 overflow-hidden font-['Comic_Neue']">
+      {/* 🌸 Animated Heart Background */}
+      <HeartBackground />
 
       {/* 💌 Welcome Modal */}
       {showWelcome && (
