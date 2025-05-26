@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Heart, Sparkles, X } from 'lucide-react';
+import { Heart, Sparkles, Lock } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -24,7 +24,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [showWelcome, setShowWelcome] = useState(false);
   const [moodMessage, setMoodMessage] = useState<string | null>(null);
-  const [showCuteModal, setShowCuteModal] = useState(false);
+  const [showSecret, setShowSecret] = useState(false);
 
   useEffect(() => {
     const hasShown = sessionStorage.getItem('welcomeShown');
@@ -90,12 +90,13 @@ export default function Home() {
 
   const saySomethingCute = () => {
     confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
-    setShowCuteModal(true);
+    alert('💖 i loveeee youuu sooo mucchhh KUROO 😘💋✨🧸');
   };
 
   return (
-    <div className="relative min-h-screen bg-pink-50 flex flex-col items-center p-6 overflow-hidden">
-      {/* Floating Hearts */}
+    <div className="relative min-h-screen bg-[#fff0f6] flex flex-col items-center p-6 overflow-hidden font-[\'Comic Neue\']">
+
+      {/* 💖 Floating Hearts Background */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         {[...Array(20)].map((_, i) => (
           <motion.div
@@ -115,13 +116,17 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Welcome Modal */}
+      {/* 💌 Welcome Modal */}
       {showWelcome && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
           <div className="bg-white rounded-2xl shadow-lg p-6 max-w-md text-center border-4 border-pink-200">
             <h2 className="text-xl font-bold text-pink-600 mb-2">📣 Welcome to the Love Complaints Portal! 💔</h2>
             <p className="text-pink-800 mb-4 text-sm leading-relaxed">
-              You can submit love complaints, select your mood, and get cute surprises 😘
+              Here you can say whatever you want to tell your silly boyfriend indirectly:
+              <br /><br />🥺 Cry about ignored texts,<br />😤 Rant about forgotten anniversaries,<br />😆 Complain about silly fights,<br />😍 And still say "I love you" five seconds later.
+              <br /><br />Your love drama is safe here. Let it out. We won’t judge.
+              (In fact, we might even give you a virtual tissue 🧻💕)
+              <br /><br />Ready? Go spill the tea. ☕
             </p>
             <button
               onClick={() => setShowWelcome(false)}
@@ -133,88 +138,94 @@ export default function Home() {
         </div>
       )}
 
-      {/* Cute Modal */}
-      <AnimatePresence>
-        {showCuteModal && (
-          <motion.div
-            className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="bg-white rounded-3xl p-8 max-w-sm text-center border-4 border-pink-300 relative shadow-2xl"
-              initial={{ scale: 0.7 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.7 }}
+      {/* 👩‍❤️‍👨 Photos */}
+      <div className="flex justify-center items-center gap-6 mb-4 z-10">
+        <div className="text-center">
+          <img src="/shorya.jpg" alt="Shorya" className="w-24 h-24 rounded-full border-4 border-pink-300 object-cover" />
+          <p className="mt-2 font-semibold text-pink-700">Shorya</p>
+        </div>
+        <div className="text-center">
+          <img src="/reya.jpg" alt="Reya" className="w-24 h-24 rounded-full border-4 border-pink-300 object-cover" />
+          <p className="mt-2 font-semibold text-pink-700">Reya</p>
+        </div>
+      </div>
+
+      <motion.h1 className="text-4xl font-bold text-pink-700 mb-4 z-10" initial={{ y: -30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: 'spring', stiffness: 100 }}>
+        Shorya & Reya's Love Portal <Sparkles className="inline ml-2 text-yellow-400" />
+      </motion.h1>
+
+      <p className="text-lg text-pink-600 mb-6 text-center z-10">
+        Hey Reya! Got a tiny grievance or a silly little complaint? Submit it here, and I'll fix it with love and kisses!
+      </p>
+
+      {/* Complaint Form */}
+      <div className="w-full max-w-lg bg-white shadow-lg rounded-2xl p-4 z-10">
+        <textarea className="w-full p-2 border border-pink-200 rounded mb-4" placeholder="Write your sweet complaint here..." value={newComplaint} onChange={(e) => setNewComplaint(e.target.value)} rows={4} />
+        <button onClick={handleSubmitComplaint} disabled={loading} className="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded w-full flex justify-center items-center">
+          {loading ? 'Loading...' : 'Submit with Love'} <Heart className="ml-2" />
+        </button>
+      </div>
+
+      {/* Mood Selector */}
+      <div className="mt-6 text-center z-10">
+        <p className="mb-2 text-pink-700 font-medium">How’s your mood, Reya?</p>
+        <div className="flex gap-3 justify-center">
+          {moodOptions.map((mood) => (
+            <motion.button
+              key={mood.label}
+              onClick={() => handleMoodSelect(mood.emoji, mood.label)}
+              className="text-3xl hover:scale-125 transition-transform"
+              whileTap={{ scale: 1.5, rotate: 10 }}
+              title={mood.label}
             >
-              <button
-                onClick={() => setShowCuteModal(false)}
-                className="absolute top-2 right-2 text-pink-500 hover:text-pink-700"
-              >
-                <X />
-              </button>
-              <h2 className="text-2xl font-bold text-pink-600 mb-4">💖 Sooo Cute!</h2>
-              <p className="text-pink-800 text-lg leading-relaxed">
-                i loveeee youuu sooo mucchhh KUROO 😘💋✨🧸<br /> You're my whole universe 💫
-              </p>
-            </motion.div>
+              {mood.emoji}
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {moodMessage && (
+          <motion.div className="fixed bottom-4 bg-pink-400 text-white px-6 py-3 rounded-full font-semibold shadow-lg z-50" initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 40 }} transition={{ duration: 0.4 }}>
+            {moodMessage}
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Input */}
-      <div className="z-10 mt-8 w-full max-w-md">
-        <input
-          type="text"
-          placeholder="Enter your love complaint 💌"
-          value={newComplaint}
-          onChange={(e) => setNewComplaint(e.target.value)}
-          className="w-full p-3 border-2 border-pink-300 rounded-xl shadow focus:outline-none focus:ring-2 focus:ring-pink-400"
-        />
-        <button
-          onClick={handleSubmitComplaint}
-          className="mt-2 w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2 rounded-xl"
-        >
-          Submit Complaint 💖
+      <motion.button onClick={saySomethingCute} className="mt-6 bg-pink-400 hover:bg-pink-500 text-white font-bold py-2 px-6 rounded z-10" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+        💖 Say Something Cute
+      </motion.button>
+
+      {/* Secret Section Toggle */}
+      <div className="mt-10 text-center z-10">
+        <button onClick={() => setShowSecret(!showSecret)} className="text-sm text-pink-600 underline hover:text-pink-800 flex items-center justify-center mx-auto">
+          <Lock className="h-4 w-4 mr-1" /> Reya Only Section
         </button>
+        <AnimatePresence>
+          {showSecret && (
+            <motion.div className="mt-4 p-4 bg-pink-100 border border-pink-300 rounded-xl text-pink-800 max-w-md mx-auto" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
+              💌 Hi Reya, you're my most precious human. This section is just for you.
+              <br />Thank you for being YOU. You're perfect, beautiful and the sunshine of my every day. 💖
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Mood Buttons */}
-      <div className="mt-6 flex gap-2 flex-wrap justify-center z-10">
-        {moodOptions.map(({ label, emoji }) => (
-          <button
-            key={label}
-            onClick={() => handleMoodSelect(emoji, label)}
-            className="px-4 py-2 rounded-full bg-white border border-pink-300 shadow hover:bg-pink-100 transition"
-          >
-            {emoji} {label}
-          </button>
-        ))}
-      </div>
-
-      {/* Mood message */}
-      {moodMessage && (
-        <div className="mt-4 text-sm text-pink-700 font-medium z-10">{moodMessage}</div>
+      {/* Display Complaints */}
+      {complaints.length > 0 && (
+        <div className="mt-10 w-full max-w-2xl z-10">
+          <h2 className="text-2xl font-semibold text-pink-700 mb-4">Reya's Adorable Complaints</h2>
+          {complaints.map((c, i) => (
+            <div key={i} className="mb-3 bg-white shadow rounded-xl p-4 border border-pink-100">
+              <p className="text-xl">{c.mood ? moodOptions.find(m => m.label === c.mood)?.emoji : ''}</p>
+              <p className="text-pink-800 mt-2">{c.content}</p>
+              <p className="text-sm text-gray-500 mt-2 italic">
+                Noted, my love. Shorya will handle this with hugs and maybe a surprise chocolate!
+              </p>
+            </div>
+          ))}
+        </div>
       )}
-
-      {/* Complaints list */}
-      <div className="mt-10 w-full max-w-md space-y-2 z-10">
-        {complaints.map((c, i) => (
-          <div key={i} className="bg-white p-3 rounded-xl border border-pink-200 shadow">
-            <p className="text-pink-800 text-sm">{c.content}</p>
-            {c.mood && <p className="text-xs text-pink-400 mt-1">Mood: {c.mood}</p>}
-          </div>
-        ))}
-      </div>
-
-      {/* Cute Button */}
-      <button
-        onClick={saySomethingCute}
-        className="fixed bottom-6 right-6 bg-pink-400 hover:bg-pink-500 text-white p-4 rounded-full shadow-lg z-10"
-      >
-        <Sparkles />
-      </button>
     </div>
   );
 }
